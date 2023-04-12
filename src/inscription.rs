@@ -69,24 +69,19 @@ impl Inscription {
 
     if let Some(content_type) = &self.content_type {
       builder = builder.push_slice(content_tag_push_bytes);
-
-      content_type.iter().for_each(|t| {
-        //let content_type_push_bytes = PushBytesBuf::try_from(t).unwrap();
-        let xt = &[*t];
-        let content_type_push_bytes: &PushBytes = <&PushBytes>::try_from(xt).unwrap();
-        builder = builder.clone().push_slice(content_type_push_bytes);
-      });
+      let content_type_push_bytes: &PushBytes =
+        <&PushBytes>::try_from(content_type.as_slice()).unwrap();
+      builder = builder.push_slice(content_type_push_bytes);
     }
 
     if let Some(body) = &self.body {
       let body_tag_push_bytes: &PushBytes = <&PushBytes>::try_from(BODY_TAG).unwrap();
-
       builder = builder.push_slice(body_tag_push_bytes);
-      body.iter().for_each(|chunk| {
-        let xchunk = &[*chunk];
-        let chunk_push_bytes: &PushBytes = <&PushBytes>::try_from(xchunk).unwrap();
-        builder = builder.clone().push_slice(chunk_push_bytes);
-      });
+
+      for chunk in body.chunks(520) {
+        let body_chunk_push_bytes: &PushBytes = <&PushBytes>::try_from(chunk).unwrap();
+        builder = builder.push_slice(body_chunk_push_bytes);
+      }
     }
 
     builder.push_opcode(opcodes::all::OP_ENDIF)
