@@ -497,6 +497,35 @@ mod tests {
   }
 
   #[test]
+  fn valid_ignore_multiple_inscribers() {
+    let xopk = [0u8; 32];
+
+    let script = script::Builder::new()
+      .push_slice(xopk.clone())
+      .push_opcode(opcodes::all::OP_CHECKSIG)
+      .push_slice(xopk.clone())
+      .push_opcode(opcodes::all::OP_CHECKSIGADD)
+      .push_slice(xopk.clone())
+      .push_opcode(opcodes::all::OP_CHECKSIGADD)
+      .push_int(3)
+      .push_opcode(opcodes::all::OP_EQUALVERIFY)
+      .push_opcode(opcodes::OP_FALSE)
+      .push_opcode(opcodes::all::OP_IF)
+      .push_slice(b"ord")
+      .push_slice(&[1])
+      .push_slice(b"text/plain;charset=utf-8")
+      .push_slice(&[])
+      .push_slice(b"ord")
+      .push_opcode(opcodes::all::OP_ENDIF)
+      .into_script();
+
+    assert_eq!(
+      InscriptionParser::parse(&Witness::from_slice(&vec![script.into_bytes(), Vec::new()])),
+      Ok(inscription("text/plain;charset=utf-8", "ord")),
+    );
+  }
+
+  #[test]
   fn valid_ignore_inscriptions_after_first() {
     let script = script::Builder::new()
       .push_opcode(opcodes::OP_FALSE)
