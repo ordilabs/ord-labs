@@ -136,8 +136,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "ord-mini"
-version = "0.5.2-alpha"
+name = "ord-labs"
+version = "0.1.0"
 dependencies = [
  "anyhow",
  "bitcoin",

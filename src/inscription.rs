@@ -36,27 +36,6 @@ impl Inscription {
     InscriptionParser::parse(&tx.input.get(0)?.witness).ok()
   }
 
-  // pub(crate) fn from_file(_network: Network, path: impl AsRef<Path>) -> Result<Self, Error> {
-  //     let path = path.as_ref();
-
-  //     let body =
-  //         fs::read(path).with_context(|| format!("io error reading {}", path.display()))?;
-
-  //     // if let Some(limit) = chain.inscription_content_size_limit() {
-  //     //     let len = body.len();
-  //     //     if len > limit {
-  //     //         bail!("content size of {len} bytes exceeds {limit} byte limit for {chain} inscriptions");
-  //     //     }
-  //     // }
-
-  //     let content_type = Media::content_type_for_path(path)?;
-
-  //     Ok(Self {
-  //         body: Some(body),
-  //         content_type: Some(content_type.into()),
-  //     })
-  // }
-
   fn append_reveal_script_to_builder(&self, mut builder: script::Builder) -> script::Builder {
     let protocol_push_bytes: &PushBytes = <&PushBytes>::try_from(PROTOCOL_ID).unwrap();
 
