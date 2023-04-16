@@ -1,4 +1,4 @@
 mod inscription;
 mod media;
-pub use inscription::*;
-pub use media::*;
+pub use inscription::Inscription;
+pub use media::Media;
