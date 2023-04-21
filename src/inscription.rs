@@ -36,6 +36,22 @@ impl Inscription {
     InscriptionParser::parse(&tx.input.get(0)?.witness).ok()
   }
 
+  pub fn from_transaction_experiment(tx: &Transaction) -> Vec<Option<Inscription>> {
+    let mut inscriptions = Vec::with_capacity(&tx.input.len());
+    let mut has_any = false;
+    for input in &tx.input {
+      let inscription = InscriptionParser::parse(&input.witness).ok();
+      if inscription.is_some() {
+        has_any = true;
+      }
+      inscriptions.push(inscription);
+    }
+    if !has_any {
+      return vec![];
+    }
+    inscriptions
+  }
+
   fn append_reveal_script_to_builder(&self, mut builder: script::Builder) -> script::Builder {
     let protocol_push_bytes: &PushBytes = <&PushBytes>::try_from(PROTOCOL_ID).unwrap();
 
