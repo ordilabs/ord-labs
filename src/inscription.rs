@@ -38,14 +38,17 @@ impl Inscription {
 
   #[cfg(feature = "unstable")]
   pub fn from_transaction_experiment(tx: &Transaction) -> Vec<Option<Inscription>> {
-    let mut inscriptions = Vec::with_capacity(tx.input.len());
+    let mut inscriptions = vec![];
     let mut has_any = false;
-    for input in &tx.input {
+    for (i, input) in tx.input.iter().enumerate() {
       let inscription = InscriptionParser::parse(&input.witness).ok();
       if inscription.is_some() {
-        has_any = true;
+        if false == has_any {
+          has_any = true;
+          inscriptions.resize_with(tx.input.len(), Default::default);
+        }
+        inscriptions[i] = inscription;
       }
-      inscriptions.push(inscription);
     }
     if !has_any {
       return vec![];
@@ -812,8 +815,10 @@ mod tests {
       ],
       output: Vec::new(),
     };
-
-    assert_eq!(Inscription::from_transaction_experiment(&tx).len(), 2);
+    let vec = Inscription::from_transaction_experiment(&tx);
+    assert_eq!(vec.len(), 2);
+    assert!(vec[0].is_none());
+    assert!(vec[1].is_some());
   }
 
   pub(crate) fn inscription(content_type: &str, body: impl AsRef<[u8]>) -> Inscription {
