@@ -37,23 +37,20 @@ impl Inscription {
   }
 
   #[cfg(feature = "unstable")]
-  pub fn from_transaction_experiment(tx: &Transaction) -> Vec<Option<Inscription>> {
-    let mut inscriptions = vec![];
+  pub fn from_transaction_vec(tx: &Transaction) -> Vec<Option<Inscription>> {
+    let mut v = vec![];
     let mut has_any = false;
     for (i, input) in tx.input.iter().enumerate() {
       let inscription = InscriptionParser::parse(&input.witness).ok();
       if inscription.is_some() {
         if false == has_any {
           has_any = true;
-          inscriptions.resize_with(tx.input.len(), Default::default);
+          v.resize_with(tx.input.len(), Default::default);
         }
-        inscriptions[i] = inscription;
+        v[i] = inscription;
       }
     }
-    if !has_any {
-      return vec![];
-    }
-    inscriptions
+    v
   }
 
   fn append_reveal_script_to_builder(&self, mut builder: script::Builder) -> script::Builder {
@@ -815,7 +812,7 @@ mod tests {
       ],
       output: Vec::new(),
     };
-    let vec = Inscription::from_transaction_experiment(&tx);
+    let vec = Inscription::from_transaction_vec(&tx);
     assert_eq!(vec.len(), 2);
     assert!(vec[0].is_none());
     assert!(vec[1].is_some());
