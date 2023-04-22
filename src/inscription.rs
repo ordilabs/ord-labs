@@ -790,6 +790,32 @@ mod tests {
     );
   }
 
+  #[cfg(feature = "unstable")]
+  #[test]
+  fn hidden_inscriptions_are_found() {
+    let tx = Transaction {
+      version: 0,
+      lock_time: bitcoin::locktime::absolute::LockTime::from_height(0).unwrap(),
+      input: vec![
+        TxIn {
+          previous_output: OutPoint::null(),
+          script_sig: ScriptBuf::new(),
+          sequence: Sequence(0),
+          witness: Witness::new(),
+        },
+        TxIn {
+          previous_output: OutPoint::null(),
+          script_sig: ScriptBuf::new(),
+          sequence: Sequence(0),
+          witness: inscription("foo", [1; 1040]).to_witness(),
+        },
+      ],
+      output: Vec::new(),
+    };
+
+    assert_eq!(Inscription::from_transaction_experiment(&tx).len(), 2);
+  }
+
   pub(crate) fn inscription(content_type: &str, body: impl AsRef<[u8]>) -> Inscription {
     Inscription::new(Some(content_type.into()), Some(body.as_ref().into()))
   }
