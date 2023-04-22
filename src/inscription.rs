@@ -36,6 +36,7 @@ impl Inscription {
     InscriptionParser::parse(&tx.input.get(0)?.witness).ok()
   }
 
+  #[cfg(feature = "unstable")]
   pub fn from_transaction_experiment(tx: &Transaction) -> Vec<Option<Inscription>> {
     let mut inscriptions = Vec::with_capacity(tx.input.len());
     let mut has_any = false;

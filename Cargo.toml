@@ -10,3 +10,6 @@ license = "MIT"
 bitcoin = "0.30.0"
 anyhow = "1.0.70"
 mp4 = "0.13.0"
+
+[features]
+unstable = []
