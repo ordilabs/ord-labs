@@ -37,7 +37,7 @@ impl Inscription {
   }
 
   pub fn from_transaction_experiment(tx: &Transaction) -> Vec<Option<Inscription>> {
-    let mut inscriptions = Vec::with_capacity(&tx.input.len());
+    let mut inscriptions = Vec::with_capacity(tx.input.len());
     let mut has_any = false;
     for input in &tx.input {
       let inscription = InscriptionParser::parse(&input.witness).ok();
