@@ -36,6 +36,23 @@ impl Inscription {
     InscriptionParser::parse(&tx.input.get(0)?.witness).ok()
   }
 
+  #[cfg(feature = "unstable")]
+  pub fn from_transaction_vec(tx: &Transaction) -> Vec<Option<Inscription>> {
+    let mut v = vec![];
+    let mut has_any = false;
+    for (i, input) in tx.input.iter().enumerate() {
+      let inscription = InscriptionParser::parse(&input.witness).ok();
+      if inscription.is_some() {
+        if false == has_any {
+          has_any = true;
+          v.resize_with(tx.input.len(), Default::default);
+        }
+        v[i] = inscription;
+      }
+    }
+    v
+  }
+
   fn append_reveal_script_to_builder(&self, mut builder: script::Builder) -> script::Builder {
     let protocol_push_bytes: &PushBytes = <&PushBytes>::try_from(PROTOCOL_ID).unwrap();
 
@@ -771,6 +788,34 @@ mod tests {
       InscriptionParser::parse(&envelope(&[b"ord", &[2], &[0]])),
       Err(InscriptionError::UnrecognizedEvenField),
     );
+  }
+
+  #[cfg(feature = "unstable")]
+  #[test]
+  fn hidden_inscriptions_are_found() {
+    let tx = Transaction {
+      version: 0,
+      lock_time: bitcoin::locktime::absolute::LockTime::from_height(0).unwrap(),
+      input: vec![
+        TxIn {
+          previous_output: OutPoint::null(),
+          script_sig: ScriptBuf::new(),
+          sequence: Sequence(0),
+          witness: Witness::new(),
+        },
+        TxIn {
+          previous_output: OutPoint::null(),
+          script_sig: ScriptBuf::new(),
+          sequence: Sequence(0),
+          witness: inscription("foo", [1; 1040]).to_witness(),
+        },
+      ],
+      output: Vec::new(),
+    };
+    let vec = Inscription::from_transaction_vec(&tx);
+    assert_eq!(vec.len(), 2);
+    assert!(vec[0].is_none());
+    assert!(vec[1].is_some());
   }
 
   pub(crate) fn inscription(content_type: &str, body: impl AsRef<[u8]>) -> Inscription {
